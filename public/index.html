@@ -6,7 +6,7 @@
     <title>Socket Zoom</title>
 </head>
 <body>
-    <form id="msgForm">
+    <!-- <form id="msgForm">
         <h1>Sockets Zoom By HArsha</h1>
 
         <video id="localVideo" autoplay muted playsinline></video>
@@ -15,7 +15,85 @@
         <input type="text" placeholder="Type a Message..." id="inputMsg" />
         <button type="submit">Send</button>
         <ul id="ulMsgs"></ul>
+    </form> -->
+
+
+    <form id="msgForm" style="
+        max-width: 480px; 
+        margin: 1rem auto; 
+        padding: 1.5rem; 
+        background: #1e1e2f; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2); 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        color: #f0f0f5;
+        display: flex; 
+        flex-direction: column;
+        gap: 1rem;
+        ">
+    <h1 style="
+        font-size: 1.8rem; 
+        text-align: center; 
+        margin-bottom: 0.5rem; 
+        color: #70a1ff;
+        font-weight: 700;
+        ">Sockets Zoom By Harsha</h1>
+
+    <video id="localVideo" autoplay muted playsinline style="
+        width: 100%; 
+        height: auto; 
+        border-radius: 12px; 
+        background: #0d1117; 
+        box-shadow: 0 4px 12px rgba(112,161,255,0.4);
+    "></video>
+
+    <video id="remoteVideo" autoplay playsinline style="
+        width: 100%; 
+        height: auto; 
+        border-radius: 12px; 
+        background: #0d1117; 
+        box-shadow: 0 4px 12px rgba(112,161,255,0.6);
+    "></video>
+
+    <input type="text" placeholder="Type a Message..." id="inputMsg" style="
+        padding: 0.75rem 1rem; 
+        border-radius: 10px; 
+        border: none; 
+        font-size: 1rem; 
+        outline: none;
+        background: #2c2f4a; 
+        color: #f0f0f5;
+        box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+    " />
+
+    <button type="submit" style="
+        padding: 0.75rem 1rem; 
+        border-radius: 12px; 
+        border: none; 
+        background: #70a1ff; 
+        color: white; 
+        font-size: 1rem; 
+        font-weight: 600; 
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    "
+    onmouseover="this.style.background='#4d79ff'"
+    onmouseout="this.style.background='#70a1ff'"
+    >Send</button>
+
+    <ul id="ulMsgs" style="
+        list-style: none; 
+        max-height: 140px; 
+        overflow-y: auto; 
+        padding-left: 0; 
+        margin: 0; 
+        font-size: 0.95rem;
+        background: #121524; 
+        border-radius: 10px; 
+        box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+    "></ul>
     </form>
+
 
 
 
@@ -72,7 +150,8 @@
 
         async function startVideo(){
             localStream = await navigator.mediaDevices.getUserMedia({
-                video: true
+                video: true,
+                audio: true
             });
             localVideo.srcObject = localStream;
 
