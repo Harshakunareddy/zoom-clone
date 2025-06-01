@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Zoom</title>
+</head>
+<body>
+    <form id="msgForm">
+        <h1>Sockets Zoom By HArsha</h1>
+
+        <video id="localVideo" autoplay muted playsinline></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+
+        <input type="text" placeholder="Type a Message..." id="inputMsg" />
+        <button type="submit">Send</button>
+        <ul id="ulMsgs"></ul>
+    </form>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io();
+
+        const inputMsg = document.getElementById('inputMsg');
+        const messagesList = document.getElementById('ulMsgs');
+
+
+        const form = document.getElementById('msgForm');
+
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault();
+            sendMessage();
+        });
+
+        const sendMessage = ()=>{
+
+            const data = inputMsg.value;
+            socket.emit('message',data);
+            inputMsg.value = '';
+
+            addMessage('You :' + data);
+        }
+
+
+        socket.on('message',(data)=>{
+            addMessage('Friend : ' + data.msg);
+        });
+
+        const addMessage =(data)=>{
+            console.log(data);
+            
+            const li = document.createElement('li');
+            li.innerText = data;
+            messagesList.appendChild(li);
+        }
+
+
+
+
+
+        let localStream;
+        let peerConnection;
+        const config = {
+            iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            }] 
+        }
+
+
+        async function startVideo(){
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: true
+            });
+            localVideo.srcObject = localStream;
+
+            peerConnection = new RTCPeerConnection(config);
+
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            peerConnection.onicecandidate = ({candidate}) => {
+                if(candidate){
+                    socket.emit('ice-candidate', candidate);
+                }
+            };
+
+            peerConnection.ontrack = (e) => {
+                remoteVideo.srcObject = e.streams[0];
+            }
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            socket.emit('offer',offer);
+
+        }
+
+        socket.on('offer', async (offer) => {
+            if(!peerConnection){
+                startVideo();
+            }
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+            const answer = await peerConnection.createAnswer();
+
+            await peerConnection.setLocalDescription(answer);
+
+        })
+
+
+        socket.on('answer', async (answer) => {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        let remoteDescriptionSet = false;
+        let candidateQueue = [];
+
+        socket.on('ice-candidate', async(candidate) => {
+            if (remoteDescriptionSet) {
+                try {
+                    await peerConnection.addIceCandidate(candidate);
+                    console.log("✅ ICE candidate added");
+                } catch (e) {
+                    console.error("❌ Error Adding received ICE Candidate", e);
+                }
+            } else {
+                console.log("🕓 Queuing ICE candidate...");
+                candidateQueue.push(candidate);
+            }
+        });
+
+        window.onload = () =>{
+            startVideo();
+        }
+
+        
+    </script>
+    
+</body>
+</html>
